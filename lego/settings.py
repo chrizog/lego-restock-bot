@@ -12,7 +12,7 @@ BOT_NAME = "lego"
 SPIDER_MODULES = ["lego.spiders"]
 NEWSPIDER_MODULE = "lego.spiders"
 
-CONNECTION_STRING = "sqlite:///scrapy_products_new.db"
+CONNECTION_STRING = "sqlite:///scrapy_products.db"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'lego (+http://www.yourdomain.com)'
