@@ -16,45 +16,8 @@ from lego.database import (
     Availability,
     does_product_exist,
 )
-from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy import and_, func
 from scrapy.exceptions import DropItem
-from datetime import date
-
-
-class AvailabilityDuplicatePipeline:
-    def __init__(self) -> None:
-        engine = db_connect()
-        create_table(engine)
-        self.session = sessionmaker(bind=engine)
-
-    def process_item(self, item: LegoItem, spider):
-        session: Session = self.session()
-        exist_product: Product = (
-            session.query(Product).filter_by(product_id=item["product_id"]).first()
-        )
-        session.close()
-        if exist_product is None:  # the current product does not exist
-            raise DropItem("Product does not exist in database: %s" % item["name"])
-        else:
-            session: Session = self.session()
-            exist_availability: List[Availability] = (
-                session.query(Availability)
-                .filter(
-                    and_(
-                        func.date(Availability.timestamp) == date.today(),
-                        Availability.product_id == exist_product.product_id,
-                    )
-                )
-                .all()
-            )
-            session.close()
-            if len(exist_availability) < 1:
-                # there is no data for today yet
-                print("!!!! No data yet for: " + item["name"] + " !!!!")
-                return item
-            else:
-                raise DropItem("There is already a sample for today: %s" % item["name"])
 
 
 class AvailabilityPipeline:
