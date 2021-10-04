@@ -15,6 +15,7 @@ from lego.database import (
     Product,
     Availability,
     does_product_exist,
+    update_product_price,
 )
 from sqlalchemy import and_, func
 from scrapy.exceptions import DropItem
@@ -35,6 +36,28 @@ class AvailabilityPipeline:
             availability.availability = item["availability"]
             try:
                 add_availability(availability, self.engine)
+            except:
+                raise
+            return item
+
+
+class UpdatePricePipeline:
+    def __init__(self) -> None:
+        self.engine = db_connect()
+        create_table(self.engine)
+
+    def process_item(self, item: LegoItem, spider):
+        # the current product does not exist
+        if not does_product_exist(item["product_id"], self.engine):
+            raise DropItem("Product does not exist in database: %s" % item["name"])
+        else:
+            product = Product()
+            product.name = item["name"]
+            product.price = item["price"]
+            product.product_id = item["product_id"]
+            product.url = item["url"]
+            try:
+                update_product_price(product, self.engine)
             except:
                 raise
             return item
@@ -61,7 +84,7 @@ class LegoPipeline:
         return item
 
 
-class DuplicatesPipeline(object):
+class DuplicatesPipeline:
     def __init__(self):
         """
         Create tables if they don't exist yet

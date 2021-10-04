@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Integer, String, DateTime
 from scrapy.utils.project import get_project_settings
-from sqlalchemy.orm.session import Session, sessionmaker
+from sqlalchemy.orm.session import Session
 from sqlalchemy.sql.expression import asc
 
 Base = declarative_base()
@@ -100,9 +100,25 @@ def get_availabilities(product_id_to_search: int, engine: Engine):
         return ret
 
 
+def get_product(product_id: int, engine: Engine) -> Product:
+    with Session(engine) as session:
+        product = session.query(Product).filter_by(product_id=product_id).first()
+        if product is None:
+            raise Exception("Product for ID {} does not exist".format(product_id))
+        return product
+
+
 def add_product(product: Product, engine: Engine):
     with Session(engine) as session:
         session.add(product)
+        session.commit()
+
+
+def update_product_price(product: Product, engine: Engine):
+    with Session(engine) as session:
+        session.query(Product).filter_by(product_id=product.product_id).update(
+            {"price": product.price}
+        )
         session.commit()
 
 
@@ -110,3 +126,7 @@ def add_availability(availability: Availability, engine: Engine):
     with Session(engine) as session:
         session.add(availability)
         session.commit()
+
+
+def clean_old_availability_entries(min_timestamp, engine: Engine):
+    pass

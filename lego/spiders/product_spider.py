@@ -4,7 +4,7 @@ from scrapy.loader import ItemLoader
 from scrapy.linkextractors import LinkExtractor
 from lego.items import LegoItem
 from lego.settings import ITEM_PIPELINES
-from ..database import db_connect, load_product_urls
+from lego.database import db_connect, load_product_urls
 
 
 class AvailabilitySpider(scrapy.Spider):
@@ -12,6 +12,7 @@ class AvailabilitySpider(scrapy.Spider):
     custom_settings = {
         "ITEM_PIPELINES": {
             "lego.pipelines.AvailabilityPipeline": 200,
+            "lego.pipelines.UpdatePricePipeline": 300,
         }
     }
 

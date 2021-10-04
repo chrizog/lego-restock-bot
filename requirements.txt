@@ -1,7 +1,10 @@
+APScheduler==3.6.3
 attrs==21.2.0
 Automat==20.2.0
 autopep8==1.5.7
 black==21.9b0
+cachetools==4.2.2
+certifi==2021.5.30
 cffi==1.14.6
 click==8.0.1
 constantly==15.1.0
@@ -30,6 +33,9 @@ pycodestyle==2.7.0
 pycparser==2.20
 PyDispatcher==2.0.5
 pyOpenSSL==20.0.1
+python-dotenv==0.19.0
+python-telegram-bot==13.7
+pytz==2021.3
 queuelib==1.6.2
 regex==2021.9.30
 Scrapy==2.5.0
@@ -38,7 +44,9 @@ six==1.16.0
 SQLAlchemy==1.4.23
 toml==0.10.2
 tomli==1.2.1
+tornado==6.1
 Twisted==21.7.0
 typing-extensions==3.10.0.2
+tzlocal==3.0
 w3lib==1.22.0
 zope.interface==5.4.0

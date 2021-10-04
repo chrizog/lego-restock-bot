@@ -4,7 +4,7 @@
 # https://docs.scrapy.org/en/latest/topics/items.html
 
 import scrapy
-from scrapy.loader.processors import MapCompose, TakeFirst
+from itemloaders.processors import MapCompose, TakeFirst
 
 
 def process_price(price_text: str) -> int:
@@ -31,6 +31,7 @@ AVAILABILITY_CODES = {
     1: "Jetzt verfügbar",
     2: "Vorübergehend nicht auf Lager",
     3: "Ausverkauft",
+    4: "Nachbestellungen möglich",  # Example: "Nachbestellungen möglich. Versand zum 12. Oktober 2021"
     -1: "Unknown",
 }
 
@@ -38,6 +39,10 @@ AVAILABILITY_CODES = {
 def availability_str_to_int(text: str) -> int:
     for k, v in AVAILABILITY_CODES.items():
         if v == text:
+            return k
+        elif (
+            k == 4 and AVAILABILITY_CODES[4] in text
+        ):  # special case. Text contains "Nachbestellungen möglich"
             return k
     raise Exception("Verfügbarkeitsstatus {} unkown".format(text))
 
