@@ -1,12 +1,19 @@
+# pylint: disable=R0201
+""" Contains a LegoRestockBot class to create and send Telegram messages for product updates """
+
 import telegram
 
 
 def price_cents_to_str(cents: int) -> str:
-    return ("{:.2f}".format(float(cents) / 100.0)).replace(".", ",")
+    """Helper to convert cents to a decimal representation in Euro"""
+    return f"{float(cents) / 100.0:.2f}".replace(".", ",")
 
 
 class LegoRestockBot:
+    """Class to create and send Lego update messages"""
+
     def __init__(self, token: str, channel_id: str) -> None:
+        """Instantiante the telegram.Bot with the Telegram bot token"""
         self.bot = telegram.Bot(token=token)
         self.channel_id = channel_id
 
@@ -18,7 +25,9 @@ class LegoRestockBot:
         product_price_cents: int,
     ) -> str:
         """
-        Possible HTML tags:
+        Create a message about an available product
+
+        Possible HTML tags to be used in Telegram:
         <b>bold</b>, <strong>bold</strong>
         <i>italic</i>, <em>italic</em>
         <a href="http://www.example.com/">inline URL</a>
@@ -26,14 +35,10 @@ class LegoRestockBot:
         <pre>pre-formatted fixed-width code block</pre>"""
 
         # "🚀➡️"
-        return '🚀 <b>{}</b> #{} 🚀\n\n <b>{}</b> ist wieder für {}€ verfügbar!\n\n➡️➡️ Zum Lego Shop <a href="{}">#{}: {}</a>'.format(
-            product_name,
-            product_id,
-            product_name,
-            price_cents_to_str(product_price_cents),
-            product_url,
-            product_id,
-            product_name,
+        return (
+            f"🚀 <b>{product_name}</b> #{product_id} 🚀\n\n <b>{product_name}</b> ist wieder für \
+            {price_cents_to_str(product_price_cents)}€ verfügbar!\n\n➡️➡️ "
+            + f'Zum Lego Shop <a href="{product_url}">#{product_id}: {product_name}</a>'
         )
 
     def create_message_reorder(
@@ -43,7 +48,10 @@ class LegoRestockBot:
         product_url: str,
     ) -> str:
         """
-        Possible HTML tags:
+        Create a message about a product that can be ordered again on the lego page
+
+        Possible HTML tags to be used in Telegram:
+
         <b>bold</b>, <strong>bold</strong>
         <i>italic</i>, <em>italic</em>
         <a href="http://www.example.com/">inline URL</a>
@@ -51,14 +59,12 @@ class LegoRestockBot:
         <pre>pre-formatted fixed-width code block</pre>"""
 
         # "🚀➡️"
-        return '🚀  <b>{}</b> #{} 🚀\n\n Für <b>{}</b> sind wieder Nachbestellungen möglich!\n\n➡️➡️ Zum Lego Shop <a href="{}">#{}: {}</a>'.format(
-            product_name,
-            product_id,
-            product_name,
-            product_url,
-            product_id,
-            product_name,
+        return (
+            f"🚀  <b>{product_name}</b> #{product_id} 🚀\n\n Für <b>{product_name}</b> sind wieder \
+            Nachbestellungen möglich!\n\n➡️➡️ "
+            + f'Zum Lego Shop <a href="{product_url}">#{product_id}: {product_name}</a>'
         )
 
     def send_html_message_to_channel(self, html_str: str):
+        """Sends a message to the telegram channel in HTML mode"""
         self.bot.send_message(text=html_str, chat_id=self.channel_id, parse_mode="html")
