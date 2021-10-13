@@ -1,4 +1,5 @@
 from typing import List
+import datetime
 from sqlalchemy import create_engine, Column, ForeignKey, func
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import relationship
@@ -128,5 +129,9 @@ def add_availability(availability: Availability, engine: Engine):
         session.commit()
 
 
-def clean_old_availability_entries(min_timestamp, engine: Engine):
-    pass
+def delete_old_availability_entries(min_timestamp: datetime, engine: Engine):
+    with Session(engine) as session:
+        session.query(Availability).filter(
+            Availability.timestamp <= min_timestamp
+        ).delete()
+        session.commit()
