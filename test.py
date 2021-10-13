@@ -182,6 +182,7 @@ class TelegramBotTest(unittest.TestCase):
 
     def test_format_price(self):
         """Test the currency formating from cents to a string"""
+
         self.assertEqual(telegram_message.price_cents_to_str(0), "0,00")
         self.assertEqual(telegram_message.price_cents_to_str(100), "1,00")
         self.assertEqual(telegram_message.price_cents_to_str(222), "2,22")

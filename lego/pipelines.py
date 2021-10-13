@@ -1,10 +1,15 @@
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
+# pylint: disable=R0903
+"""Scrapy pipelines for
 
+- LegoPipeline: Adds new lego products to the database
+- DuplicatesPipelines: Drop items that already exist in the database
+- UpdatePricePipeline: Update the price of a lego product in the database
+- AvailabilityPipeline: Add an entry about the availability of a product to the database
 
-# useful for handling different item types with a single interface
+Don't forget to add your pipeline to the ITEM_PIPELINES setting
+See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
+"""
+
 from scrapy.exceptions import DropItem
 from lego.items import LegoItem
 from lego.database import (
@@ -20,32 +25,41 @@ from lego.database import (
 
 
 class AvailabilityPipeline:
+    """Pipeline for adding an availability entry for a product to the database"""
+
     def __init__(self) -> None:
-        self.engine = db_connect()
-        create_table(self.engine)
-
-    def process_item(self, item: LegoItem, spider):
-        # the current product does not exist
-        if not does_product_exist(item["product_id"], self.engine):
-            raise DropItem("Product does not exist in database: %s" % item["name"])
-
-        availability = Availability()
-        availability.product_id = item["product_id"]
-        availability.availability = item["availability"]
-        try:
-            add_availability(availability, self.engine)
-        except:
-            raise
-        return item
-
-
-class UpdatePricePipeline:
-    def __init__(self) -> None:
+        """Create tables if they don't exist yet"""
         self.engine = db_connect()
         create_table(self.engine)
 
     def process_item(self, item: LegoItem):
-        # the current product does not exist
+        """Pipeline process function.
+        Drops the item if product does not exist in the database.
+        Adds an entry to the Availability table for the product
+        """
+        if not does_product_exist(item["product_id"], self.engine):
+            raise DropItem(f"Product does not exist in database: {item['name']}")
+
+        availability = Availability()
+        availability.product_id = item["product_id"]
+        availability.availability = item["availability"]
+        add_availability(availability, self.engine)
+        return item
+
+
+class UpdatePricePipeline:
+    """Pipeline for updating the price of a lego product in the database"""
+
+    def __init__(self) -> None:
+        """Create tables if they don't exist yet"""
+        self.engine = db_connect()
+        create_table(self.engine)
+
+    def process_item(self, item: LegoItem):
+        """Pipeline process function.
+        Drops the item if product does not exist in the database.
+        Updates the price of the product in the Product table
+        """
         if not does_product_exist(item["product_id"], self.engine):
             raise DropItem(f"Product does not exist in database: {item['name']}")
 
@@ -54,43 +68,43 @@ class UpdatePricePipeline:
         product.price = item["price"]
         product.product_id = item["product_id"]
         product.url = item["url"]
-        try:
-            update_product_price(product, self.engine)
-        except:
-            raise
+        update_product_price(product, self.engine)
         return item
 
 
 class LegoPipeline:
+    """Pipeline for adding new lego products to the database"""
+
     def __init__(self) -> None:
+        """Create tables if they don't exist yet"""
         self.engine = db_connect()
         create_table(self.engine)
 
     def process_item(self, item: LegoItem):
-        """Save products in the database
-        This method is called for every item pipeline component
+        """Pipeline process function.
+        Save products in the database
         """
         product = Product()
         product.name = item["name"]
         product.price = item["price"]
         product.product_id = item["product_id"]
         product.url = item["url"]
-        try:
-            add_product(product, self.engine)
-        except:
-            raise
+        add_product(product, self.engine)
         return item
 
 
 class DuplicatesPipeline:
+    """Pipeline for dropping duplicate lego products"""
+
     def __init__(self):
-        """
-        Create tables if they don't exist yet
-        """
+        """Create tables if they don't exist yet"""
         self.engine = db_connect()
         create_table(self.engine)
 
-    def process_item(self, item: LegoItem, spider):
+    def process_item(self, item: LegoItem):
+        """Pipeline process function.
+        Drop items that already exist in the database
+        """
         if does_product_exist(item["product_id"], self.engine):
-            raise DropItem("Duplicate item found: %s" % item["name"])
+            raise DropItem(f"Duplicate item found: {item['name']}")
         return item
