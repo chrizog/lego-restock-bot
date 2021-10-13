@@ -1,29 +1,34 @@
-# Define here the models for your scraped items
-#
-# See documentation in:
-# https://docs.scrapy.org/en/latest/topics/items.html
+"""Models definition for scraped items
+
+See documentation in:
+https://docs.scrapy.org/en/latest/topics/items.html
+"""
 
 import scrapy
 from itemloaders.processors import MapCompose, TakeFirst
 
 
 def process_price(price_text: str) -> int:
-    # 19,99\xa0€ -> 19.99
-    # return the price in cents as an integer
+    """Convert the incoming price string to an integer in cents
+    Example:
+        in: 19,99\xa0€
+        out: 1999
+    """
     try:
-        splitted = price_text.split(u"\xa0")
+        splitted = price_text.split("\xa0")
         price = float(splitted[0].replace(",", "."))
         price = int(price * 100)
         return price
-    except:
+    except:  # pylint: disable=bare-except
         return 0
 
 
 def str_to_int(text: str) -> int:
+    """Convert a string to int"""
     try:
         i = int(text)
         return i
-    except:
+    except:  # pylint: disable=bare-except
         return text
 
 
@@ -31,28 +36,40 @@ AVAILABILITY_CODES = {
     1: "Jetzt verfügbar",
     2: "Vorübergehend nicht auf Lager",
     3: "Ausverkauft",
-    4: "Nachbestellungen möglich",  # Example: "Nachbestellungen möglich. Versand zum 12. Oktober 2021"
+    # Example: "Nachbestellungen möglich. Versand zum 12. Oktober 2021"
+    4: "Nachbestellungen möglich",
     -1: "Unknown",
 }
 
 
 def availability_str_to_int(text: str) -> int:
-    for k, v in AVAILABILITY_CODES.items():
-        if v == text:
-            return k
-        elif (
-            k == 4 and AVAILABILITY_CODES[4] in text
+    """Lookup the corresponding availability status int code for the string"""
+    for key, value in AVAILABILITY_CODES.items():
+        if value == text:
+            return key
+        if (
+            key == 4 and AVAILABILITY_CODES[4] in text
         ):  # special case. Text contains "Nachbestellungen möglich"
-            return k
-    raise Exception("Verfügbarkeitsstatus {} unkown".format(text))
+            return key
+    raise Exception(f"Verfügbarkeitsstatus {text} unkown")
 
 
-def availability_int_to_str(a: int) -> str:
-    return AVAILABILITY_CODES[a]
+def availability_int_to_str(availability: int) -> str:
+    """Lookup the corresponding availability string for the int code"""
+    return AVAILABILITY_CODES[availability]
 
 
 class LegoItem(scrapy.Item):
-    # define the fields for your item here like:
+    """Model for a Lego scrapy Item
+
+    Fields:
+        - name
+        - price: in cents
+        - product_id: Lego product ID
+        - availability: integer representing the availability status
+        - url: url to lego product page
+    """
+
     name = scrapy.Field(output_processor=TakeFirst())
     price = scrapy.Field(
         input_processor=MapCompose(process_price), output_processor=TakeFirst()
