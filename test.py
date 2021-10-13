@@ -155,27 +155,30 @@ class TelegramBotTest(unittest.TestCase):
     def setUp(self) -> None:
         """Instantiate the LegoRestockBot class with bot token and channel id"""
         config = dotenv_values(".env")
+        self.enable_test = False
 
-        self.bot = LegoRestockBot(
-            config["TELEGRAM_BOT_TOKEN"], config["TELEGRAM_CHANNEL_ID"]
-        )
+        if self.enable_test:
+            self.bot = LegoRestockBot(
+                config["TELEGRAM_BOT_TOKEN"], config["TELEGRAM_CHANNEL_ID"]
+            )
 
     def test_send_message(self):
         """Send some dummy messages to the channel"""
-        html_message_1 = self.bot.create_message_available(
-            60267,
-            "Sarafi-Geländewagen",
-            "https://www.lego.com/de-de/product/safari-off-roader-60267",
-            9999,
-        )
-        html_message_2 = self.bot.create_message_reorder(
-            60267,
-            "Sarafi-Geländewagen",
-            "https://www.lego.com/de-de/product/safari-off-roader-60267",
-        )
-        print(html_message_1)
-        print(html_message_2)
-        # self.bot.send_html_message_to_channel(html_message_1)
+        if self.enable_test:
+            html_message_1 = self.bot.create_message_available(
+                60267,
+                "Sarafi-Geländewagen",
+                "https://www.lego.com/de-de/product/safari-off-roader-60267",
+                9999,
+            )
+            html_message_2 = self.bot.create_message_reorder(
+                60267,
+                "Sarafi-Geländewagen",
+                "https://www.lego.com/de-de/product/safari-off-roader-60267",
+            )
+            print(html_message_1)
+            print(html_message_2)
+            # self.bot.send_html_message_to_channel(html_message_1)
 
     def test_format_price(self):
         """Test the currency formating from cents to a string"""
