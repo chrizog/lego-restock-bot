@@ -1,3 +1,4 @@
+# pylint: disable=C0301,C0114
 # Scrapy settings for lego project
 #
 # For simplicity, this file contains only settings considered important or

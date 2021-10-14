@@ -1,33 +1,24 @@
 #!/usr/bin/python3
 
-import datetime
+"""Script which checks the availability of Lego products
+
+Adds new entries to the Availability database for the newest availability
+If an availability changes to "available" it sends notifications via Telegram
+"""
+
 from dotenv import dotenv_values
-from database import (
+from lego.database import (
     load_product_ids,
     get_availabilities,
     db_connect,
     get_product_name,
     get_product,
 )
-from items import availability_int_to_str
-from telegram_message import LegoRestockBot
-
-outputfile = "products_log.txt"
+from lego.items import availability_int_to_str
+from lego.telegram_message import LegoRestockBot
 
 if __name__ == "__main__":
-
-    def append_to_logfile(text: str):
-        with open(outputfile, "a") as logfile:
-            logfile.write(text)
-
     config = dotenv_values(".env")
-
-    append_to_logfile(
-        "--- Last update {} ---\n".format(
-            datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
-        )
-    )
-
     engine = db_connect()
     product_ids = load_product_ids(engine)
 
@@ -43,28 +34,21 @@ if __name__ == "__main__":
                 new_status = availability_int_to_str(last_availability)
                 product_name = get_product_name(product_id, engine)
 
-                append_to_logfile(
-                    "Product {} {} changed from {} to {}\n".format(
-                        product_id, product_name, old_status, new_status
-                    )
-                )
-
-                if (
-                    last_availability == 1 or last_availability == 4
-                ):  # 1: Jetzt verfügbar oder 4: Nachbestellungen möglich
+                if last_availability in [
+                    1,
+                    4,
+                ]:  # 1: Jetzt verfügbar oder 4: Nachbestellungen möglich
                     telegram_bot = LegoRestockBot(
                         config["TELEGRAM_BOT_TOKEN"], config["TELEGRAM_CHANNEL_ID"]
                     )
-
                     product = get_product(product_id, engine)
 
                     if last_availability == 1:
                         message = telegram_bot.create_message_available(
                             product_id, product.name, product.url, product.price
                         )
-                        telegram_bot.send_html_message_to_channel(message)
-                    elif last_availability == 4:
+                    else:
                         message = telegram_bot.create_message_reorder(
                             product_id, product.name, product.url
                         )
-                        telegram_bot.send_html_message_to_channel(message)
+                    telegram_bot.send_html_message_to_channel(message)

@@ -1,13 +1,20 @@
-from json import load
+"""This module contains 2 scrapy Spiders
+
+The LegoProductSpider follows links on the Lego shop page and searches for Lego products
+The Availability does not follow links and scrapes the current availability on the
+Lego product pages
+"""
+
 import scrapy
 from scrapy.loader import ItemLoader
 from scrapy.linkextractors import LinkExtractor
 from lego.items import LegoItem
-from lego.settings import ITEM_PIPELINES
 from lego.database import db_connect, load_product_urls
 
 
 class AvailabilitySpider(scrapy.Spider):
+    """A scrapy spider to extract the availabilities of crawled Lego products"""
+
     name = "availability"
     custom_settings = {
         "ITEM_PIPELINES": {
@@ -45,6 +52,8 @@ class AvailabilitySpider(scrapy.Spider):
 
 
 class LegoProductSpider(scrapy.Spider):
+    """A scrapy spider to search for Lego products in the Lego shop page"""
+
     name = "products"
     custom_settings = {
         "ITEM_PIPELINES": {
@@ -57,8 +66,8 @@ class LegoProductSpider(scrapy.Spider):
         super().__init__(name=name, **kwargs)
         self.num_of_requests = 0
         self.link_extractor = LinkExtractor(
-            allow=[".*lego\.com/de-de.*"],
-            deny=[r".*lego\.com(.*)(\.\w{1,3})$", ".*@lego\.com.*"],
+            allow=[r".*lego\.com/de-de.*"],
+            deny=[r".*lego\.com(.*)(\.\w{1,3})$", r".*@lego\.com.*"],
         )
 
     def start_requests(self):
@@ -67,7 +76,6 @@ class LegoProductSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response: scrapy.http.Response, **kwargs):
-
         page = response.url
         self.log(page)
         if "de-de/product" in page:
@@ -86,6 +94,5 @@ class LegoProductSpider(scrapy.Spider):
                     loader.add_value("url", response.url)
                     yield loader.load_item()
 
-        # for next_page in response.css('a::attr(href)').getall():
         for next_page in self.link_extractor.extract_links(response):
             yield response.follow(next_page, self.parse)
