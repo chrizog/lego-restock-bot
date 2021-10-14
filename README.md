@@ -1,5 +1,7 @@
 # lego-restock-bot
 
+<img src="./assets/pylint.svg"><br>
+
 Get informed when Lego shop products are available again.
 
 This project uses scrapy to extract information from the German Lego shop page.
