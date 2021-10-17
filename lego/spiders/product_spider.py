@@ -23,9 +23,6 @@ class AvailabilitySpider(scrapy.Spider):
         }
     }
 
-    def __init__(self, name=None, **kwargs):
-        super().__init__(name=name, **kwargs)
-
     def start_requests(self):
         urls = load_product_urls(db_connect())
         for url in urls:
@@ -64,7 +61,6 @@ class LegoProductSpider(scrapy.Spider):
 
     def __init__(self, name=None, **kwargs):
         super().__init__(name=name, **kwargs)
-        self.num_of_requests = 0
         self.link_extractor = LinkExtractor(
             allow=[r".*lego\.com/de-de.*"],
             deny=[r".*lego\.com(.*)(\.\w{1,3})$", r".*@lego\.com.*"],

@@ -32,7 +32,7 @@ class AvailabilityPipeline:
         self.engine = db_connect()
         create_table(self.engine)
 
-    def process_item(self, item: LegoItem):
+    def process_item(self, item: LegoItem, spider):  # pylint: disable=W0613
         """Pipeline process function.
         Drops the item if product does not exist in the database.
         Adds an entry to the Availability table for the product
@@ -55,7 +55,7 @@ class UpdatePricePipeline:
         self.engine = db_connect()
         create_table(self.engine)
 
-    def process_item(self, item: LegoItem):
+    def process_item(self, item: LegoItem, spider):  # pylint: disable=W0613
         """Pipeline process function.
         Drops the item if product does not exist in the database.
         Updates the price of the product in the Product table
@@ -80,7 +80,7 @@ class LegoPipeline:
         self.engine = db_connect()
         create_table(self.engine)
 
-    def process_item(self, item: LegoItem):
+    def process_item(self, item: LegoItem, spider):  # pylint: disable=W0613
         """Pipeline process function.
         Save products in the database
         """
@@ -101,7 +101,7 @@ class DuplicatesPipeline:
         self.engine = db_connect()
         create_table(self.engine)
 
-    def process_item(self, item: LegoItem):
+    def process_item(self, item: LegoItem, spider):  # pylint: disable=W0613
         """Pipeline process function.
         Drop items that already exist in the database
         """
