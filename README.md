@@ -8,6 +8,7 @@ This project uses scrapy to extract information from the German Lego shop page.
 It crawls products from the shop and scrapes their information. You can regularly run the scraping to check whether products are in stock again.
 In case of available products, you can send automatic Telegram messages to stay up to date.
 
+Find the blog article about the project here: [A Real-World Scrapy Tutorial - Python Lego Shop Restock Bot](https://chrizog.com/lego-shop-python-scraping)
 
 ### Installation
 
